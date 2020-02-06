@@ -6,13 +6,18 @@ using System.Threading.Tasks;
 
 namespace Labs
 {
-	class MyArray
+	class SportsmenRepository
 	{
-		private int[] _array;
+		private List<Sportsman> _sportsmen;
 
-		public MyArray(int length)
+		public SportsmenRepository(IEnumerable<Sportsman> sportsmen)
 		{
-			_array = new int[length];
+			_sportsmen = sportsmen.ToList();
+		}
+
+		public IEnumerable<Sportsman> Where(Func<Sportsman, bool> predicate)
+		{
+			return _sportsmen.Where(predicate);
 		}
 	}
 }

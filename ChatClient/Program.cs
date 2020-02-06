@@ -20,7 +20,7 @@ namespace ChatClient
 			var clientId = Guid.NewGuid();
 			sender.Send(Encoding.UTF8.GetBytes(clientId.ToString()), SocketFlags.None);
 
-			StartListeningAsync(sender);
+			_ = StartListeningAsync(sender);
 
 			Console.WriteLine($"Connected! Your id is {clientId}");
 			
@@ -35,15 +35,16 @@ namespace ChatClient
 		{
 			await Task.Run(() =>
 			{
+				string msg = string.Empty;
 				while (socket.Connected)
 				{
-					string msg = string.Empty;
 					var buffer = new byte[256];
 					int readCount = socket.Receive(buffer);
 					msg += Encoding.UTF8.GetString(buffer.Take(readCount).ToArray());
 					if (socket.Available == 0)
 					{
 						Console.WriteLine(msg);
+						msg = string.Empty;
 					}
 				};
 			});
