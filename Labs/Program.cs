@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace Labs
 {
-	public class Program
+	class Program
 	{
 		static void Main(string[] args)
 		{
@@ -36,7 +36,6 @@ namespace Labs
 				var ordered = MagicSorter<Person>.OrderByPropertyName(persons, propertyName);
 				PrintPersons(ordered);
 				Console.WriteLine();
-				Console.ReadLine();
 			}
 			Console.ReadLine();
 		}
@@ -67,7 +66,6 @@ namespace Labs
 	class MagicSorter<T>
 	{
 		private static Dictionary<string, Sorter<T>> _propNameToSelector = new Dictionary<string, Sorter<T>>();
-		private static Dictionary<Type, Sorter<T>> _sortersCache = new Dictionary<Type, Sorter<T>>();
 
 		static MagicSorter()
 		{
@@ -75,15 +73,14 @@ namespace Labs
 			var propInfos = typeInfo.GetProperties();
 			foreach (var propertyInfo in propInfos)
 			{
-				if (!_sortersCache.TryGetValue(propertyInfo.PropertyType, out Sorter<T> sorter))
-				{
-					var parameters = Expression.Parameter(typeInfo);
-					var ret = Expression.Property(parameters, typeInfo, propertyInfo.Name);
+				var parameters = Expression.Parameter(typeInfo);
+				var ret = Expression.Property(parameters, typeInfo, propertyInfo.Name);
 
-					var createSortedMethod = typeof(Sorter<T>).GetMethod(nameof(Sorter<T>.Create)).MakeGenericMethod(propertyInfo.PropertyType);
+				var createSorterMethod = typeof(Sorter<T>).GetMethod(nameof(Sorter<T>.Create))
+					.MakeGenericMethod(propertyInfo.PropertyType);
 
-					sorter = (Sorter<T>)createSortedMethod.Invoke(null, new[] { Expression.Lambda(ret, parameters).Compile() });
-				}
+				var sorter =
+					(Sorter<T>)createSorterMethod.Invoke(null, new[] { Expression.Lambda(ret, parameters).Compile() });
 				_propNameToSelector.Add(propertyInfo.Name, sorter);
 			}
 		}
